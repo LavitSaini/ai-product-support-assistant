@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
 import connectDB from "./config/db.js";
+import authRouter from "./routes/auth.route.js";
 
 dotenv.config();
 
@@ -23,6 +24,8 @@ app.get("/api/v1/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+app.use("/api/auth", authRouter);
 
 app.listen(PORT, () => {
   console.log("Server is listening on PORT " + PORT);
