@@ -3,8 +3,12 @@ import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
+
+
 import authRouter from "./routes/auth.route.js";
+import productRouter from "./routes/product.route.js";
 
 dotenv.config();
 
@@ -16,6 +20,7 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(cookieParser());
 
 app.get("/api/v1/health", (req, res) => {
   res.status(200).json({
@@ -26,6 +31,7 @@ app.get("/api/v1/health", (req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/products", productRouter);
 
 app.listen(PORT, () => {
   console.log("Server is listening on PORT " + PORT);

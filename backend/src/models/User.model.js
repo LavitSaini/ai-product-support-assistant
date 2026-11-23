@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
   {
@@ -6,7 +7,7 @@ const userSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      maxLength: [25, "Name can only contains maximum 25 characters"]
+      maxLength: [25, "Name can only contains maximum 25 characters"],
     },
 
     email: {
@@ -26,7 +27,22 @@ const userSchema = new Schema(
   },
 );
 
-userSchema.index({ email: 1});
+userSchema.pre("save", async function () {
+  const user = this;
+  if (!user.isModified("password")) {
+    return;
+  }
+  user.password = await bcrypt.hash(user.password, 10);
+});
+
+userSchema.set("toJSON", {
+  versionKey: false,
+  transform: function (doc, ret) {
+    delete ret.password;
+  },
+});
+
+userSchema.index({ email: 1 });
 
 const User = model("User", userSchema);
 
