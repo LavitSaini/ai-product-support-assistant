@@ -9,6 +9,7 @@ import connectDB from "./config/db.js";
 
 import authRouter from "./routes/auth.route.js";
 import productRouter from "./routes/product.route.js";
+import manualRouter from "./routes/manual.route.js";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.get("/api/v1/health", (req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
+app.use("/api/manuals", manualRouter);
 
 app.listen(PORT, () => {
   console.log("Server is listening on PORT " + PORT);

@@ -98,7 +98,7 @@ export const login = async (req, res) => {
     }
 
     const token = await generateToken(user._id);
-    console.log(token);
+    
     setCookies(token, res);
 
     return res.status(200).json({
