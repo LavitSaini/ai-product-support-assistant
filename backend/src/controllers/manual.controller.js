@@ -4,6 +4,7 @@ import Product from "../models/Product.model.js";
 import { generateCloudinaryUploadSignature } from "../utils/cloudinary.util.js";
 import Manual from "../models/Manual.model.js";
 import cloudinary from "../config/cloudinary.js";
+import { enqueueManualProcessing } from "../jobs/manual.queue.js";
 
 export const generateProductManualUploadSignature = async (req, res) => {
   try {
@@ -19,7 +20,7 @@ export const generateProductManualUploadSignature = async (req, res) => {
 
     // 2. Check only admins can create signature
     if (req.user.role !== "admin") {
-      return res.status(400).json({
+      return res.status(403).json({
         success: false,
         message: "Only admins can generate signature!",
       });
@@ -100,11 +101,10 @@ export const saveProductManualMetadata = async (req, res) => {
       });
     }
 
-    // 3. Check only admins can create signature
     if (req.user.role !== "admin") {
-      return res.status(400).json({
+      return res.status(403).json({
         success: false,
-        message: "Only admins can generate signature!",
+        message: "Only admins can save manual metadata.",
       });
     }
 
@@ -182,10 +182,27 @@ export const saveProductManualMetadata = async (req, res) => {
       uploadedBy: req.user._id,
     });
 
+    let job = null;
+
+    try {
+      job = await enqueueManualProcessing(manual._id);
+    } catch (queueError) {
+      console.error(
+        "Failed to enqueue manual processing job:",
+        queueError.message,
+      );
+    }
+
     return res.status(201).json({
       success: true,
-      message: "Product manual metadata saved successfully.",
-      manual,
+      message: job
+        ? "Manual saved and processing job queued."
+        : "Manual saved, but processing could not be queued. Please retry.",
+      data: {
+        manual,
+        jobId: job?.id || null,
+        processingStatus: job ? "queued" : "queue_failed",
+      },
     });
   } catch (error) {
     // Cloudinary returns an error if asset doesn't exist

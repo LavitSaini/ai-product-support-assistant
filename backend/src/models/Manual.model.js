@@ -65,6 +65,22 @@ const manualSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+
+    pageCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    processedAt: {
+      type: Date,
+      default: null,
+    },
+
+    processingError: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
